@@ -9,7 +9,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CustomerSerializer
-
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
 
 
 @login_required
@@ -210,6 +213,22 @@ def portfolio(request,pk):
                                                       'sum_recent_value' : sum_recent_value,
                                                       'sum_acquired_value': sum_acquired_value,
                                                       })
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            #return redirect('home.html')
+            return HttpResponseRedirect('/')
+    else:
+        form = UserCreationForm()
+    return render(request, 'portfolio/signup.html', {'form': form})
 
 
 # List at the end of the views.py
